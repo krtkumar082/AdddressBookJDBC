@@ -44,6 +44,7 @@ public class AddressBookDBService {
 		try {
 			while (result.next()) {
 				//int id = result.getInt("id");
+				
 				String fname = result.getString("fname");
 				String lname = result.getString("lname");
 				String address = result.getString("Address");
