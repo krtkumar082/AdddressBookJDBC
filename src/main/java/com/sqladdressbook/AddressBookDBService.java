@@ -2,6 +2,7 @@ package com.sqladdressbook;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,13 +11,14 @@ import java.util.List;
 
 public class AddressBookDBService {
 	private static AddressBookDBService abService;
+	private PreparedStatement preparedStatement;
 	public static AddressBookDBService getInstance() {
-		if(abService == null) {
+		if (abService == null) {
 			abService = new AddressBookDBService();
 		}
 		return abService;
 	}
-	
+
 	private Connection getConnection() throws SQLException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/address_book_service?useSSL=false";
 		String userName = "root";
@@ -25,7 +27,7 @@ public class AddressBookDBService {
 		connection = DriverManager.getConnection(jdbcURL, userName, password);
 		return connection;
 	}
-	
+
 	public List<AddressBookData> readData() {
 		String sql = "select * from address_book_table;";
 		List<AddressBookData> employeePayrollList = new ArrayList<>();
@@ -38,12 +40,11 @@ public class AddressBookDBService {
 		}
 		return employeePayrollList;
 	}
-	
+
 	private List<AddressBookData> getAddressBookData(ResultSet result) {
 		List<AddressBookData> addressBookList = new ArrayList<>();
 		try {
 			while (result.next()) {
-				//int id = result.getInt("id");
 				
 				String fname = result.getString("fname");
 				String lname = result.getString("lname");
@@ -53,12 +54,27 @@ public class AddressBookDBService {
 				String zip = result.getString("Zip");
 				String phone_no = result.getString("PhoneNumber");
 				String email = result.getString("Email");
-				addressBookList.add(new AddressBookData(fname, lname, address, city, state, zip,phone_no,email));
+				addressBookList.add(new AddressBookData(fname, lname, address, city, state, zip, phone_no, email));
 			}
 			System.out.println(addressBookList);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return addressBookList;
+	}
+	
+	public int updateAddressBookData_Using_PreparedStatement(String fname, String city) {
+		return this.updateAddressBookDataUsingPreparedStatement(fname, city);
+	}
+
+	private int updateAddressBookDataUsingPreparedStatement(String fname, String city) {
+		String sql = String.format("update address_book_table set City= '%s' where fname = '%s';", city, fname);
+		try (Connection connection = this.getConnection()) {
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			return stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 }
