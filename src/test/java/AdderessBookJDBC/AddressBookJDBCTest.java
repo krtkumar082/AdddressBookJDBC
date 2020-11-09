@@ -1,5 +1,8 @@
 package AdderessBookJDBC;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -43,5 +46,21 @@ public class AddressBookJDBCTest {
 		boolean result = service.checkAddressBookDataInSyncWithDB("def", "gurgaon");
 		Assert.assertTrue(result);
 	}
-	
+	@Test 
+    public void given3Contacts_WhenAdded_ShouldMatchContactsCount() {
+    	AddressBookData[] addBookData = {
+    			new AddressBookData("jkl", "mno", "12 street","city1", "state1", "1902345", "7777777777", "jkl@gmail.com"),
+    			new AddressBookData("pqr", "stu", "13 street","city2", "state2", "1233145", "7777777776", "pqr@gmail.com"),
+    			new AddressBookData("vwx", "yz", "14 street","city3", "state3", "12341315", "7777777775", "vwx@gmail.com"),
+    	};
+    	AddressBookService addBookService = new AddressBookService();
+    	addBookService.readAddressBookData(IOService.DB_IO);
+    	Instant threadStart = Instant.now();
+    	addBookService.addContactsWithThreads(Arrays.asList(addBookData));
+    	Instant threadEnd = Instant.now();
+    	System.out.println("Duration with thread : " + Duration.between(threadStart, threadEnd));
+    	List<AddressBookData> addressBookData = addBookService.readAddressBookData(IOService.DB_IO);
+    	System.out.println(addressBookData.size());
+    	Assert.assertEquals(8, addressBookData.size());
+    }
 }
